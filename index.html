@@ -197,22 +197,22 @@ textarea{resize:none;min-height:60px;line-height:1.4}
 .emt{font-size:15px;font-weight:500;color:var(--tx2)}
 .ems{font-size:13px;color:var(--tx3);margin-top:4px}
 
-/* ── SCROLL WHEEL PICKER ───────────────────────────── */
-.picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:flex-end;backdrop-filter:blur(4px)}
-.picker-sheet{width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding-bottom:calc(var(--sb) + 8px)}
+/* ── TOUCH PICKER ─────────────────────────────────── */
+.picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;display:flex;align-items:flex-end;backdrop-filter:blur(4px)}
+.picker-sheet{width:100%;background:var(--bg2);border-radius:20px 20px 0 0;padding-bottom:calc(var(--sb) + 8px);user-select:none;-webkit-user-select:none}
 .picker-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--bd)}
 .picker-label{font-size:15px;font-weight:600}
 .picker-done{background:var(--am);color:var(--bg);border:none;border-radius:8px;padding:8px 20px;font-size:15px;font-weight:600}
-.picker-cols{display:flex;justify-content:center;gap:0;padding:0 24px}
-.picker-col{flex:1;position:relative;height:280px;overflow:hidden}
-.picker-col-inner{overflow-y:scroll;height:280px;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;padding:120px 0;scrollbar-width:none;touch-action:pan-y}
-.picker-col-inner::-webkit-scrollbar{display:none}
-.picker-item{height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;font-family:'DM Mono',monospace;color:var(--tx3);scroll-snap-align:center;font-weight:400}
+.picker-cols{display:flex;justify-content:center;padding:0 24px}
+.picker-col{flex:1;position:relative;height:264px;overflow:hidden;cursor:grab}
+.picker-viewport{position:relative;height:264px;overflow:hidden}
+.picker-list{position:absolute;left:0;right:0;top:0;will-change:transform}
+.picker-item{height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;font-family:'DM Mono',monospace;color:var(--tx3);font-weight:400;transition:color .1s,font-size .1s}
 .picker-item.sel{color:var(--tx);font-weight:600;font-size:26px}
-.picker-mask-top,.picker-mask-bot{position:absolute;left:0;right:0;height:120px;pointer-events:none;z-index:2}
-.picker-mask-top{top:0;background:linear-gradient(to bottom,var(--bg2) 0%,transparent 100%)}
-.picker-mask-bot{bottom:0;background:linear-gradient(to top,var(--bg2) 0%,transparent 100%)}
-.picker-line{position:absolute;left:8%;right:8%;top:50%;transform:translateY(-50%);height:40px;border-top:1px solid var(--bd2);border-bottom:1px solid var(--bd2);pointer-events:none;z-index:3}
+.picker-mask-t,.picker-mask-b{position:absolute;left:0;right:0;height:110px;pointer-events:none;z-index:2}
+.picker-mask-t{top:0;background:linear-gradient(to bottom,var(--bg2) 0%,transparent 100%)}
+.picker-mask-b{bottom:0;background:linear-gradient(to top,var(--bg2) 0%,transparent 100%)}
+.picker-line{position:absolute;left:8%;right:8%;top:50%;transform:translateY(-50%);height:44px;border-top:1px solid var(--bd2);border-bottom:1px solid var(--bd2);pointer-events:none;z-index:3}
 .picker-col-lbl{text-align:center;font-size:10px;color:var(--tx3);letter-spacing:.05em;text-transform:uppercase;padding:4px 0 10px;font-family:'DM Mono',monospace}
 
 /* Value display button (replaces text input) */
@@ -234,7 +234,7 @@ textarea{resize:none;min-height:60px;line-height:1.4}
   <div id="hdr">
     <div class="hdr-row">
       <span class="hdr-title">Training</span>
-      <span class="hdr-ver">v1.2</span>
+      <span class="hdr-ver">v1.3</span>
     </div>
     <div class="tabs">
       <button class="tab on" onclick="nav('schedule',this)">Schedule</button>
@@ -248,8 +248,8 @@ textarea{resize:none;min-height:60px;line-height:1.4}
 </div>
 
 <!-- Picker overlay -->
-<div id="picker-overlay" class="picker-overlay" style="display:none" onclick="pickerBgClick(event)">
-  <div class="picker-sheet" onclick="event.stopPropagation()">
+<div id="picker-overlay" class="picker-overlay" style="display:none">
+  <div class="picker-sheet">
     <div class="picker-hdr">
       <span class="picker-label" id="picker-label">Select</span>
       <button class="picker-done" onclick="pickerDone()">Done</button>
@@ -269,8 +269,7 @@ async function loadProgram() {
     const r = await fetch('program.json');
     if (r.ok) { PROG = await r.json(); return; }
   } catch(e) {}
-  // Inline fallback — same structure as program.json
-PROG = {"meta":{"name":"Ballet Dancer In-Season Program","version":"1.3"},"sessions":{"AP":{"name":"Push — Partnering Strength","fullName":"Day Push — Overhead Strength & Shoulder Health","color":"#7c6fdf","colorDim":"#151338","optional":false,"upperBody":true,"exercises":[{"id":"ohp","name":"Overhead Barbell Press","type":"loaded","prescribed":"4 × 4–6","rpe":"7–8","sets":4,"regions":["upper_push"],"restNote":"3–5 min","note":"Primary partnering lift. Full lockout at top."},{"id":"dip","name":"Weighted Dips","type":"loaded","prescribed":"4 × 5–8","rpe":"7–8","sets":4,"regions":["upper_push"],"restNote":"3–4 min","note":"Triceps lockout transfers directly to holding overhead lifts."},{"id":"hkp","name":"Half-Kneeling Single-Arm DB Press","type":"loaded","prescribed":"3 × 8 each side","rpe":"6–7","sets":3,"regions":["upper_push"],"restNote":"90 sec","note":"Kneeling removes leg drive — pure shoulder stability."},{"id":"lat","name":"Lateral Raises (strict)","type":"loaded","prescribed":"3 × 12–15","rpe":"6","sets":3,"regions":["upper_push"],"restNote":"60 sec","note":"Slow lower. No swinging."},{"id":"sws","name":"Serratus Wall Slides","type":"bodyweight","prescribed":"2–3 × 10–12","rpe":"5–6","sets":2,"regions":["upper_push"],"restNote":"60 sec","note":"Scapular control. Slide arms up wall keeping contact."}]},"AL":{"name":"Pull — Lifting Mechanics","fullName":"Day Pull — Back Strength & Posterior Chain","color":"#4a9fd4","colorDim":"#0a1e2e","optional":false,"upperBody":true,"exercises":[{"id":"wpu","name":"Weighted Pull-Ups","type":"loaded","prescribed":"4 × 4–6","rpe":"7–8","sets":4,"regions":["upper_pull"],"restNote":"3–5 min","note":"Dead hang to chin over bar. Full ROM every rep."},{"id":"rdl","name":"Romanian Deadlift","type":"loaded","prescribed":"3 × 5–6","rpe":"7","sets":3,"regions":["lower"],"restNote":"3–4 min","note":"Hip hinge — feel hamstring stretch. Stop when back rounds."},{"id":"scr","name":"Seated Cable Row (1-sec pause)","type":"loaded","prescribed":"3 × 8–10","rpe":"6–7","sets":3,"regions":["upper_pull"],"restNote":"90 sec","note":"1-sec hold at chest. Elbows drive back."},{"id":"fpu","name":"Face Pulls","type":"loaded","prescribed":"3 × 12–15","rpe":"6","sets":3,"regions":["upper_pull"],"restNote":"60 sec","note":"Rope at eye height. External rotate at end."},{"id":"fac","name":"Farmer's Carries","type":"carry","prescribed":"3 × 20–40s","rpe":"7","sets":3,"regions":["carry"],"restNote":"90 sec","note":"Tall posture, slight shoulder pack."}]},"AF":{"name":"Full Body — Upper","fullName":"Day Full Body — Compressed Upper (Constrained Week)","color":"#9b8fe8","colorDim":"#1a1835","optional":false,"upperBody":true,"exercises":[{"id":"ohp","name":"Overhead Barbell Press","type":"loaded","prescribed":"3 × 4–5","rpe":"7–8","sets":3,"regions":["upper_push"],"restNote":"3–4 min"},{"id":"wpu","name":"Weighted Pull-Ups","type":"loaded","prescribed":"3 × 4–5","rpe":"7–8","sets":3,"regions":["upper_pull"],"restNote":"3–4 min"},{"id":"dip","name":"Weighted Dips","type":"loaded","prescribed":"2 × 5–6","rpe":"7","sets":2,"regions":["upper_push"],"restNote":"3 min"},{"id":"hkp","name":"Half-Kneeling Single-Arm DB Press","type":"loaded","prescribed":"2 × 8 each side","rpe":"6","sets":2,"regions":["upper_push"],"restNote":"90 sec"},{"id":"scr","name":"Seated Cable Row (1-sec pause)","type":"loaded","prescribed":"2 × 8–10","rpe":"6","sets":2,"regions":["upper_pull"],"restNote":"90 sec"},{"id":"fpu","name":"Face Pulls","type":"loaded","prescribed":"2 × 12–15","rpe":"5–6","sets":2,"regions":["upper_pull"],"restNote":"60 sec"},{"id":"sws","name":"Serratus Wall Slides","type":"bodyweight","prescribed":"2 × 10–12","rpe":"5","sets":2,"regions":["upper_push"],"restNote":"60 sec"}]},"B":{"name":"Lower Body & Trunk","fullName":"Day B — Lower Body Strength, Turnout & Trunk","color":"#3aaa80","colorDim":"#091e16","optional":false,"upperBody":false,"exercises":[{"id":"nhc","name":"Nordic Hamstring Curl","type":"loaded","prescribed":"3 × 4–6","rpe":"6–7","sets":3,"regions":["lower"],"restNote":"3 min","note":"3-sec eccentric lower. Partner holds ankles."},{"id":"bss","name":"Bulgarian Split Squat","type":"loaded","prescribed":"3 × 6–8 each side","rpe":"6–7","sets":3,"regions":["lower"],"restNote":"2–3 min","note":"Rear foot elevated. Upright torso."},{"id":"slr","name":"Single-Leg RDL","type":"loaded","prescribed":"2 × 6–8 each side","rpe":"6","sets":2,"regions":["lower"],"restNote":"2 min","note":"Hinge at hip, slight knee bend. Level hips."},{"id":"her","name":"Hip External Rotation (cable)","type":"loaded","prescribed":"3 × 12–15","rpe":"5–6","sets":3,"regions":["lower"],"restNote":"60–90 sec","note":"Seated or side-lying, cable at ankle. Rotate outward — targets piriformis for turnout."},{"id":"cop","name":"Copenhagen Plank","type":"timed","prescribed":"3 × 20–30s each side","rpe":"6","sets":3,"regions":["lower_core"],"restNote":"60 sec","note":"Top leg on bench, bottom leg lifted. Adductor protection."},{"id":"pal","name":"Pallof Press","type":"bodyweight","prescribed":"3 × 10–12 each side","rpe":"5–6","sets":3,"regions":["core"],"restNote":"60 sec","note":"Press straight out — resist rotating toward cable."},{"id":"tib","name":"Tibialis Raises + Foot Intrinsics","type":"timed","prescribed":"2 × 3 min","rpe":"5","sets":2,"regions":["lower_acc"],"restNote":"60 sec","note":"Tibialis: heels raised, lift toes. Foot intrinsics: short foot arch lifts, toe spreads."}]},"C":{"name":"Power & Plyometrics","fullName":"Day C — Reactive Strength & Ballón","color":"#e8a020","colorDim":"#291e07","optional":false,"upperBody":false,"exercises":[{"id":"bxj","name":"Box Jumps (max height intent)","type":"plyo","prescribed":"4 × 3–4","rpe":"6–7","sets":4,"regions":["plyo"],"restNote":"2–3 min","note":"Always first. Step down, never jump down."},{"id":"pog","name":"Pogos","type":"plyo","prescribed":"3 × 20–25","rpe":"5–6","sets":3,"regions":["plyo"],"restNote":"2 min","note":"Stiff ankle springs. Minimal ground contact."},{"id":"brj","name":"Broad Jumps","type":"plyo","prescribed":"2 × 4","rpe":"6","sets":2,"regions":["plyo"],"restNote":"2 min","note":"Max horizontal distance. Stick landing."},{"id":"scr","name":"Seated Cable Row (1-sec pause)","type":"loaded","prescribed":"2 × 8–10","rpe":"6","sets":2,"regions":["upper_pull"],"restNote":"90 sec"},{"id":"fpu","name":"Face Pulls","type":"loaded","prescribed":"2 × 12–15","rpe":"5–6","sets":2,"regions":["upper_pull"],"restNote":"60 sec"}]},"D":{"name":"Hypertrophy (Optional)","fullName":"Day D — Aesthetic Support & Balance","color":"#df6b4a","colorDim":"#281209","optional":true,"upperBody":false,"exercises":[{"id":"idb","name":"Incline DB Press","type":"loaded","prescribed":"3 × 8–10","rpe":"7","sets":3,"regions":["upper_push"],"restNote":"90 sec"},{"id":"clr","name":"Cable Lateral Raises","type":"loaded","prescribed":"3 × 12–15","rpe":"6–7","sets":3,"regions":["upper_push"],"restNote":"60 sec"},{"id":"rdf","name":"Rear Delt Fly","type":"loaded","prescribed":"3 × 12–15","rpe":"6–7","sets":3,"regions":["upper_pull"],"restNote":"60 sec"},{"id":"hcp","name":"Hammer Curls + Rope Pushdowns","type":"loaded","prescribed":"2–3 × 10–12","rpe":"6–7","sets":2,"regions":["upper_arm"],"restNote":"60 sec"},{"id":"adm","name":"Adductor Machine","type":"loaded","prescribed":"2 × 12–15","rpe":"6","sets":2,"regions":["lower"],"restNote":"60 sec"}]}},"tags":{"poor_sleep":{"label":"Poor sleep","emoji":"😴","group":"rec","affects":{"plyo":{"setReduction":1}},"note":"Reduce plyometric volume by 1 set."},"high_fatigue":{"label":"High fatigue","emoji":"🪫","group":"rec","affects":{"ALL":{"setReduction":1}},"note":"Drop 1 set from each exercise."},"low_energy":{"label":"Low energy","emoji":"🔋","group":"rec","affects":{},"rpeCap":7,"note":"Cap all exercises at RPE 7."},"heavy_legs":{"label":"Heavy legs","emoji":"🦵","group":"rec","affects":{"lower":{"setReduction":1},"plyo":{"setReduction":1},"lower_core":{"setReduction":1}},"note":"Reduce lower body & plyo by 1 set."},"upper_soreness":{"label":"Upper body soreness","emoji":"💪","group":"rec","affects":{"upper_push":{"setReduction":1},"upper_pull":{"setReduction":1},"upper_arm":{"setReduction":1}},"note":"Reduce upper body by 1 set."},"lower_soreness":{"label":"Lower body soreness","emoji":"🦵","group":"rec","affects":{"lower":{"setReduction":1},"lower_core":{"setReduction":1}},"note":"Reduce lower body by 1 set."},"hip_knee":{"label":"Hip / knee tightness","emoji":"⚠️","group":"cau","affects":{"lower":{"note":"Shorten ROM"},"plyo":{"setReduction":1}},"note":"Shorten ROM on lower body."},"shoulder":{"label":"Shoulder tightness","emoji":"⚠️","group":"cau","affects":{"upper_push":{"note":"Reduce load ~10–15%"},"upper_pull":{"note":"Bodyweight only"}},"note":"Reduce pressing load 10–15%."},"dull_ache":{"label":"Dull joint ache","emoji":"🔶","group":"cau","affects":{},"note":"Monitor during warm-up."},"sharp_pain":{"label":"Sharp / acute pain","emoji":"🚨","group":"warn","isWarning":true,"affects":{},"note":"Requires physiotherapist assessment."}}};
+  // Inline fallback — same structure as program.jso  PROG = {"meta":{"name":"Ballet Dancer In-Season Program","version":"1.3.1","athlete":"Professional male ballet dancer","phase":"In-season"},"sessions":{"AP":{"name":"Push \u2014 Partnering Strength","fullName":"Day Push \u2014 Overhead Strength & Shoulder Health","color":"#7c6fdf","colorDim":"#151338","optional":false,"upperBody":true,"exercises":[{"id":"ohp","name":"Overhead Barbell Press","type":"loaded","prescribed":"4 \u00d7 4\u20136","rpe":"7\u20138","sets":4,"regions":["upper_push"],"restNote":"3\u20135 min","note":"Primary partnering lift. Full lockout at top."},{"id":"dip","name":"Weighted Dips","type":"loaded","prescribed":"4 \u00d7 5\u20138","rpe":"7\u20138","sets":4,"regions":["upper_push"],"restNote":"3\u20134 min","note":"Triceps lockout transfers directly to holding overhead lifts."},{"id":"hkp","name":"Half-Kneeling Single-Arm DB Press","type":"loaded","prescribed":"3 \u00d7 8 each side","rpe":"6\u20137","sets":3,"regions":["upper_push"],"restNote":"90 sec","note":"Kneeling removes leg drive \u2014 pure shoulder stability."},{"id":"lat","name":"Lateral Raises (strict)","type":"loaded","prescribed":"3 \u00d7 12\u201315","rpe":"6","sets":3,"regions":["upper_push"],"restNote":"60 sec","note":"Slow lower. No swinging."},{"id":"sws","name":"Serratus Wall Slides","type":"bodyweight","prescribed":"2\u20133 \u00d7 10\u201312","rpe":"5\u20136","sets":2,"regions":["upper_push"],"restNote":"60 sec","note":"Scapular control. Slide arms up wall keeping contact."}]},"AL":{"name":"Pull \u2014 Lifting Mechanics","fullName":"Day Pull \u2014 Power, Back Strength & Grip","color":"#4a9fd4","colorDim":"#0a1e2e","optional":false,"upperBody":true,"exercises":[{"id":"hcl","name":"Hang Clean Pull","type":"loaded","prescribed":"3 \u00d7 3\u20134","rpe":"7\u20138","sets":3,"regions":["upper_pull"],"restNote":"3\u20134 min","note":"Explosive hip extension into shrug. No catch \u2014 stop at top of pull. Full intent every rep. Do first while CNS is freshest."},{"id":"wpu","name":"Weighted Pull-Ups","type":"loaded","prescribed":"4 \u00d7 4\u20136","rpe":"7\u20138","sets":4,"regions":["upper_pull"],"restNote":"3\u20135 min","note":"Dead hang to chin over bar. Full ROM every rep."},{"id":"scr","name":"Seated Cable Row (1-sec pause)","type":"loaded","prescribed":"3 \u00d7 8\u201310","rpe":"6\u20137","sets":3,"regions":["upper_pull"],"restNote":"90 sec","note":"1-sec hold at chest. Elbows drive back."},{"id":"fpu","name":"Face Pulls","type":"loaded","prescribed":"3 \u00d7 12\u201315","rpe":"6","sets":3,"regions":["upper_pull"],"restNote":"60 sec","note":"Rope at eye height. External rotate at end \u2014 hands finish by ears."},{"id":"fac","name":"Farmer's Carries","type":"carry","prescribed":"3 \u00d7 20\u201340s","rpe":"7","sets":3,"regions":["carry"],"restNote":"90 sec","note":"Tall posture, slight shoulder pack. Grip and trunk stability."}]},"AF":{"name":"Full Body \u2014 Upper","fullName":"Day Full Body \u2014 Compressed Upper (Constrained Week)","color":"#9b8fe8","colorDim":"#1a1835","optional":false,"upperBody":true,"exercises":[{"id":"ohp","name":"Overhead Barbell Press","type":"loaded","prescribed":"3 \u00d7 4\u20135","rpe":"7\u20138","sets":3,"regions":["upper_push"],"restNote":"3\u20134 min"},{"id":"wpu","name":"Weighted Pull-Ups","type":"loaded","prescribed":"3 \u00d7 4\u20135","rpe":"7\u20138","sets":3,"regions":["upper_pull"],"restNote":"3\u20134 min"},{"id":"dip","name":"Weighted Dips","type":"loaded","prescribed":"2 \u00d7 5\u20136","rpe":"7","sets":2,"regions":["upper_push"],"restNote":"3 min"},{"id":"hkp","name":"Half-Kneeling Single-Arm DB Press","type":"loaded","prescribed":"2 \u00d7 8 each side","rpe":"6","sets":2,"regions":["upper_push"],"restNote":"90 sec"},{"id":"scr","name":"Seated Cable Row (1-sec pause)","type":"loaded","prescribed":"2 \u00d7 8\u201310","rpe":"6","sets":2,"regions":["upper_pull"],"restNote":"90 sec"},{"id":"fpu","name":"Face Pulls","type":"loaded","prescribed":"2 \u00d7 12\u201315","rpe":"5\u20136","sets":2,"regions":["upper_pull"],"restNote":"60 sec"},{"id":"sws","name":"Serratus Wall Slides","type":"bodyweight","prescribed":"2 \u00d7 10\u201312","rpe":"5","sets":2,"regions":["upper_push"],"restNote":"60 sec"}]},"B":{"name":"Lower Body & Trunk","fullName":"Day B \u2014 Lower Body Strength, Turnout & Trunk","color":"#3aaa80","colorDim":"#091e16","optional":false,"upperBody":false,"exercises":[{"id":"rdl","name":"Romanian Deadlift","type":"loaded","prescribed":"3 \u00d7 5\u20136","rpe":"7","sets":3,"regions":["lower"],"restNote":"3\u20134 min","note":"Hip hinge \u2014 feel hamstring stretch at bottom. Stop when lower back rounds. Bar stays close to legs."},{"id":"nhc","name":"Nordic Hamstring Curl","type":"loaded","prescribed":"3 \u00d7 4\u20136","rpe":"6\u20137","sets":3,"regions":["lower"],"restNote":"3 min","note":"3-sec eccentric lower to floor. Partner holds ankles. #1 hamstring injury prevention exercise."},{"id":"bss","name":"Bulgarian Split Squat","type":"loaded","prescribed":"3 \u00d7 6\u20138 each side","rpe":"6\u20137","sets":3,"regions":["lower"],"restNote":"2\u20133 min","note":"Rear foot elevated on bench. Upright torso. Feel front glute loading."},{"id":"her","name":"Hip External Rotation (cable)","type":"loaded","prescribed":"3 \u00d7 12\u201315","rpe":"5\u20136","sets":3,"regions":["lower"],"restNote":"60\u201390 sec","note":"Seated or side-lying, cable at ankle. Rotate leg outward against resistance. Targets piriformis and short external rotators \u2014 turnout support."},{"id":"cop","name":"Copenhagen Plank","type":"timed","prescribed":"3 \u00d7 20\u201330s each side","rpe":"6","sets":3,"regions":["lower_core"],"restNote":"60 sec","note":"Top leg on bench, bottom leg lifted off floor. Adductor and groin protection."},{"id":"pal","name":"Pallof Press","type":"bodyweight","prescribed":"3 \u00d7 10\u201312 each side","rpe":"5\u20136","sets":3,"regions":["core"],"restNote":"60 sec","note":"Press straight out from chest \u2014 resist rotating toward cable."},{"id":"tib","name":"Tibialis Raises + Foot Intrinsics","type":"timed","prescribed":"2 \u00d7 3 min","rpe":"5","sets":2,"regions":["lower_acc"],"restNote":"60 sec","note":"Tibialis: heels on raised surface, raise toes rhythmically. Foot intrinsics: seated, short foot arch lifts, toe spreads. Achilles and plantar fascia protection."}]},"C":{"name":"Power & Plyometrics","fullName":"Day C \u2014 Reactive Strength & Ball\u00f3n","color":"#e8a020","colorDim":"#291e07","optional":false,"upperBody":false,"exercises":[{"id":"bxj","name":"Box Jumps (max height intent)","type":"plyo","prescribed":"4 \u00d7 3\u20134","rpe":"6\u20137","sets":4,"regions":["plyo"],"restNote":"2\u20133 min","note":"Always first \u2014 CNS freshest. Step down, never jump down. Full intent every rep."},{"id":"pog","name":"Pogos","type":"plyo","prescribed":"3 \u00d7 20\u201325","rpe":"5\u20136","sets":3,"regions":["plyo"],"restNote":"2 min","note":"Minimal ground contact time. Stiff ankle springs. Rhythm over height."},{"id":"brj","name":"Broad Jumps","type":"plyo","prescribed":"2 \u00d7 4","rpe":"6","sets":2,"regions":["plyo"],"restNote":"2 min","note":"Max horizontal distance. Stick the landing before next rep."},{"id":"scr","name":"Seated Cable Row (1-sec pause)","type":"loaded","prescribed":"2 \u00d7 8\u201310","rpe":"6","sets":2,"regions":["upper_pull"],"restNote":"90 sec","note":"Upper back maintenance. After plyo \u2014 fatigue is expected here."},{"id":"fpu","name":"Face Pulls","type":"loaded","prescribed":"2 \u00d7 12\u201315","rpe":"5\u20136","sets":2,"regions":["upper_pull"],"restNote":"60 sec"}]},"D":{"name":"Hypertrophy (Optional)","fullName":"Day D \u2014 Aesthetic Support & Balance","color":"#df6b4a","colorDim":"#281209","optional":true,"upperBody":false,"exercises":[{"id":"idb","name":"Incline DB Press","type":"loaded","prescribed":"3 \u00d7 8\u201310","rpe":"7","sets":3,"regions":["upper_push"],"restNote":"90 sec"},{"id":"chu","name":"Chin-Ups","type":"bodyweight","prescribed":"3 \u00d7 8\u201312","rpe":"6\u20137","sets":3,"regions":["upper_pull"],"restNote":"90 sec","note":"Supinated (underhand) grip. Full ROM \u2014 dead hang to chin over bar. Shifts emphasis to lower lat and biceps vs overhand pull-ups."},{"id":"clr","name":"Cable Lateral Raises","type":"loaded","prescribed":"3 \u00d7 12\u201315","rpe":"6\u20137","sets":3,"regions":["upper_push"],"restNote":"60 sec"},{"id":"rdf","name":"Rear Delt Fly","type":"loaded","prescribed":"3 \u00d7 12\u201315","rpe":"6\u20137","sets":3,"regions":["upper_pull"],"restNote":"60 sec"},{"id":"hcp","name":"Hammer Curls + Rope Pushdowns","type":"loaded","prescribed":"2\u20133 \u00d7 10\u201312","rpe":"6\u20137","sets":2,"regions":["upper_arm"],"restNote":"60 sec","note":"Superset: curls into pushdowns immediately. Rest after both."},{"id":"adm","name":"Adductor Machine","type":"loaded","prescribed":"2 \u00d7 12\u201315","rpe":"6","sets":2,"regions":["lower"],"restNote":"60 sec"}]}},"tags":{"poor_sleep":{"label":"Poor sleep","emoji":"\ud83d\ude34","group":"rec","affects":{"plyo":{"setReduction":1}},"note":"Reduce plyometric volume by 1 set. Strength work unchanged."},"high_fatigue":{"label":"High fatigue","emoji":"\ud83e\udeab","group":"rec","affects":{"ALL":{"setReduction":1}},"note":"Drop 1 set from each exercise. Keep prescribed RPE."},"low_energy":{"label":"Low energy","emoji":"\ud83d\udd0b","group":"rec","affects":{},"rpeCap":7,"note":"Cap all exercises at RPE 7. Volume unchanged."},"heavy_legs":{"label":"Heavy legs","emoji":"\ud83e\uddb5","group":"rec","affects":{"lower":{"setReduction":1},"plyo":{"setReduction":1},"lower_core":{"setReduction":1}},"note":"Reduce lower body & plyo by 1 set. Upper body unchanged."},"upper_soreness":{"label":"Upper body soreness","emoji":"\ud83d\udcaa","group":"rec","affects":{"upper_push":{"setReduction":1},"upper_pull":{"setReduction":1},"upper_arm":{"setReduction":1}},"note":"Reduce upper body by 1 set. Soreness is safe to train through."},"lower_soreness":{"label":"Lower body soreness","emoji":"\ud83e\uddb5","group":"rec","affects":{"lower":{"setReduction":1},"lower_core":{"setReduction":1}},"note":"Reduce lower body by 1 set."},"hip_knee":{"label":"Hip / knee tightness","emoji":"\u26a0\ufe0f","group":"cau","affects":{"lower":{"note":"Shorten ROM"},"plyo":{"setReduction":1,"note":"Focus on landing"}},"note":"Shorten ROM on lower body. Reduce plyo sets by 1."},"shoulder":{"label":"Shoulder tightness","emoji":"\u26a0\ufe0f","group":"cau","affects":{"upper_push":{"note":"Reduce load ~10\u201315%, avoid end-range"},"upper_pull":{"note":"Bodyweight only if weighted"}},"note":"Reduce pressing load 10\u201315%. Pull-ups bodyweight only."},"dull_ache":{"label":"Dull joint ache","emoji":"\ud83d\udd36","group":"cau","affects":{},"note":"Monitor during warm-up. Skip that movement if pain increases."},"sharp_pain":{"label":"Sharp / acute pain","emoji":"\ud83d\udea8","group":"warn","isWarning":true,"affects":{},"note":"Do not train through sharp pain. Requires physiotherapist assessment."}}};
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -498,16 +497,18 @@ function assignGymDays(ballet) {
     return b;
   }
 
-  // Viability thresholds — above these the slot is rejected
-  const UPPER_MAX = 7;   // upper_load must be below this
-  const LOWER_MAX = 5;   // lower_load must be below this — stricter because ballet is lower-dominant
-  const OPTIONAL_MAX = 5; // total load for Day D slot
+  // Viability thresholds — fully decoupled by region
+  // Upper sessions (AP, AL, AF) only check upper load — lower load is irrelevant
+  // Lower sessions (B, C) only check lower load — upper load is irrelevant
+  const UPPER_MAX    = 6.5; // upper_load ceiling for push/pull slots
+  const LOWER_MAX    = 5;   // lower_load ceiling for B/C slots
+  const OPTIONAL_MAX = 5;   // total load ceiling for Day D
 
-  // ── Find viable upper slots ────────────────────────────────
+  // ── Find viable upper slots (upper load only) ──────────────
   const upperSlots = [];
   for (let i=0; i<7; i++) {
     if (protectedDays.has(i)) continue;
-    if (loads[i].upper >= UPPER_MAX) continue;
+    if (loads[i].upper >= UPPER_MAX) continue; // only upper load matters here
     upperSlots.push({ idx:i, score: loads[i].upper + slotBonus(i) });
   }
   upperSlots.sort((a,b)=>a.score-b.score);
@@ -1092,73 +1093,146 @@ function promptDel(sessionKey, e) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// PICKER
+// TOUCH PICKER — JS-driven, works in iOS fixed overlays
 // ═══════════════════════════════════════════════════════════
+const ITEM_H   = 44;
+const VIEW_H   = 264;
+const CENTER_Y = Math.floor((VIEW_H - ITEM_H) / 2); // 110 — offset for idx=0
+
 let pickerCtx = null;
 const PICKER_RANGES = {
-  reps:   { items: Array.from({length:30},(_,i)=>i+1),     label:'Reps' },
-  weight: { items: Array.from({length:201},(_,i)=>i),      label:'kg' },
-  rpe:    { items: Array.from({length:10},(_,i)=>i+1),     label:'RPE' },
-  sec:    { items: Array.from({length:120},(_,i)=>(i+1)*5),label:'Seconds' }
+  reps:   { items: Array.from({length:30}, (_,i)=>i+1),      label:'Reps' },
+  weight: { items: Array.from({length:201},(_,i)=>i),         label:'kg' },
+  rpe:    { items: Array.from({length:10}, (_,i)=>i+1),      label:'RPE' },
+  sec:    { items: Array.from({length:120},(_,i)=>(i+1)*5),  label:'Seconds' }
 };
+
+let pt = {             // picker touch state
+  startY:0, startOff:0, offset:0, idx:0,
+  items:[], dragging:false, vel:0, lastY:0, lastT:0
+};
+
+function idxToOffset(idx) { return CENTER_Y - idx * ITEM_H; }
+function offsetToIdx(offset, len) {
+  return Math.max(0, Math.min(Math.round((CENTER_Y - offset) / ITEM_H), len-1));
+}
 
 function openPicker(field, exIdx, si) {
   pickerCtx = { field, exIdx, si };
-  const range = PICKER_RANGES[field];
-  const currentSet = lf.exLogs[exIdx].sets[si];
+  const range  = PICKER_RANGES[field];
+  const curSet = lf.exLogs[exIdx].sets[si];
   const storeKey = field==='sec' ? 'dur' : field;
-  const currentVal = currentSet[storeKey] !== undefined && currentSet[storeKey] !== '' ? Number(currentSet[storeKey]) : null;
+
+  // Smart start: use previous set's value → current set → midpoint
+  let startVal = null;
+  if (curSet[storeKey] !== undefined && curSet[storeKey] !== '') {
+    startVal = Number(curSet[storeKey]);
+  } else if (si > 0) {
+    const prev = lf.exLogs[exIdx].sets[si-1][storeKey];
+    if (prev !== undefined && prev !== '') startVal = Number(prev);
+  }
+  const startIdx = startVal !== null
+    ? Math.max(0, range.items.indexOf(startVal))
+    : (field==='rpe' ? 6 : field==='reps' ? 4 : field==='weight' ? 19 : 5);
 
   document.getElementById('picker-label').textContent = range.label;
-
-  const colHTML = `
+  document.getElementById('picker-cols').innerHTML = `
     <div style="flex:1">
       <div class="picker-col-lbl">${range.label}</div>
       <div class="picker-col" id="pc-main">
-        <div class="picker-mask-top"></div>
-        <div class="picker-mask-bot"></div>
-        <div class="picker-line"></div>
-        <div class="picker-col-inner" id="pci-main">
-          ${range.items.map(v=>`<div class="picker-item" data-val="${v}">${v}</div>`).join('')}
+        <div class="picker-viewport">
+          <div class="picker-list" id="picker-list">
+            ${range.items.map(v=>`<div class="picker-item">${v}</div>`).join('')}
+          </div>
         </div>
+        <div class="picker-mask-t"></div>
+        <div class="picker-mask-b"></div>
+        <div class="picker-line"></div>
       </div>
     </div>`;
 
-  document.getElementById('picker-cols').innerHTML = colHTML;
-  const overlay = document.getElementById('picker-overlay');
-  overlay.style.display = 'flex';
+  pt.items   = range.items;
+  pt.idx     = startIdx;
+  pt.offset  = idxToOffset(startIdx);
+  pt.dragging= false;
+  pt.vel     = 0;
 
-  // Smart touch containment — only block background scroll when touch is outside the picker column
-  overlay._touchHandler = (e) => {
-    const inner = document.getElementById('pci-main');
-    if (inner && inner.contains(e.target)) return; // let column scroll freely
-    e.preventDefault(); // block background page scroll
-  };
-  overlay.addEventListener('touchmove', overlay._touchHandler, { passive: false });
+  const list = document.getElementById('picker-list');
+  list.style.transform = `translateY(${pt.offset}px)`;
+  _pickerHighlight();
 
-  requestAnimationFrame(()=>{
-    const inner = document.getElementById('pci-main');
-    const idx = currentVal !== null ? range.items.indexOf(currentVal) : Math.floor(range.items.length/2);
-    inner.scrollTop = Math.max(0, idx) * 40;
-    updatePickerHighlight(inner);
-    inner.addEventListener('scroll', ()=>updatePickerHighlight(inner), { passive:true });
-  });
+  // Attach touch handlers to viewport (not overlay)
+  const vp = document.querySelector('#pc-main .picker-viewport');
+  vp.addEventListener('touchstart',  _ptStart, { passive:false });
+  vp.addEventListener('touchmove',   _ptMove,  { passive:false });
+  vp.addEventListener('touchend',    _ptEnd,   { passive:false });
+  vp.addEventListener('touchcancel', _ptEnd,   { passive:false });
+
+  document.getElementById('picker-overlay').style.display = 'flex';
 }
 
-function updatePickerHighlight(inner) {
-  const scrollTop = inner.scrollTop;
-  const centerIdx = Math.round(scrollTop / 40);
-  inner.querySelectorAll('.picker-item').forEach((el,i)=>{
-    el.classList.toggle('sel', i===centerIdx);
+function _ptStart(e) {
+  e.preventDefault();
+  pt.dragging = true;
+  pt.startY   = e.touches[0].clientY;
+  pt.startOff = pt.offset;
+  pt.vel      = 0;
+  pt.lastY    = pt.startY;
+  pt.lastT    = Date.now();
+}
+
+function _ptMove(e) {
+  e.preventDefault();
+  if (!pt.dragging) return;
+  const y   = e.touches[0].clientY;
+  const dy  = y - pt.startY;
+  const now = Date.now();
+  pt.vel  = (y - pt.lastY) / Math.max(1, now - pt.lastT);
+  pt.lastY = y; pt.lastT = now;
+
+  let off = pt.startOff + dy;
+  // Rubber band at ends
+  const maxOff = idxToOffset(0);
+  const minOff = idxToOffset(pt.items.length - 1);
+  if (off > maxOff) off = maxOff + (off - maxOff) * 0.25;
+  if (off < minOff) off = minOff + (off - minOff) * 0.25;
+  pt.offset = off;
+  const list = document.getElementById('picker-list');
+  if (list) list.style.transform = `translateY(${off}px)`;
+  pt.idx = offsetToIdx(off, pt.items.length);
+  _pickerHighlight();
+}
+
+function _ptEnd(e) {
+  e.preventDefault();
+  if (!pt.dragging) return;
+  pt.dragging = false;
+  // Apply momentum — flick gesture
+  const momentum = pt.vel * 80;
+  let targetOff  = pt.offset + momentum;
+  // Snap to nearest item
+  let snapIdx = offsetToIdx(targetOff, pt.items.length);
+  snapIdx = Math.max(0, Math.min(snapIdx, pt.items.length - 1));
+  pt.idx    = snapIdx;
+  pt.offset = idxToOffset(snapIdx);
+  const list = document.getElementById('picker-list');
+  if (list) {
+    list.style.transition = 'transform 0.22s cubic-bezier(0.25,0.46,0.45,0.94)';
+    list.style.transform  = `translateY(${pt.offset}px)`;
+    setTimeout(()=>{ if(list) list.style.transition=''; }, 250);
+  }
+  _pickerHighlight();
+}
+
+function _pickerHighlight() {
+  document.querySelectorAll('.picker-item').forEach((el,i)=>{
+    el.classList.toggle('sel', i === pt.idx);
   });
 }
 
 function pickerDone() {
-  const inner = document.getElementById('pci-main');
-  if (!inner || !pickerCtx) { closePicker(); return; }
-  const centerIdx = Math.round(inner.scrollTop / 40);
-  const range = PICKER_RANGES[pickerCtx.field];
-  const val = range.items[Math.max(0,Math.min(centerIdx, range.items.length-1))];
+  if (!pickerCtx) { closePicker(); return; }
+  const val      = pt.items[pt.idx];
   const storeKey = pickerCtx.field==='sec' ? 'dur' : pickerCtx.field;
   lf.exLogs[pickerCtx.exIdx].sets[pickerCtx.si][storeKey] = val;
   closePicker();
@@ -1168,15 +1242,19 @@ function pickerDone() {
 function closePicker() {
   const overlay = document.getElementById('picker-overlay');
   overlay.style.display = 'none';
-  if (overlay._touchHandler) {
-    overlay.removeEventListener('touchmove', overlay._touchHandler);
-    overlay._touchHandler = null;
+  // Remove touch handlers
+  const vp = document.querySelector('#pc-main .picker-viewport');
+  if (vp) {
+    vp.removeEventListener('touchstart',  _ptStart);
+    vp.removeEventListener('touchmove',   _ptMove);
+    vp.removeEventListener('touchend',    _ptEnd);
+    vp.removeEventListener('touchcancel', _ptEnd);
   }
   pickerCtx = null;
 }
 
 function pickerBgClick(e) {
-  if (e.target === document.getElementById('picker-overlay')) closePicker();
+  if (e.target===document.getElementById('picker-overlay')) closePicker();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1285,7 +1363,11 @@ function buildHistEntry(log) {
   const ts = new Date(log.date).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 
   const typeLabel = isTrain?'TRAINING LOG':'PRE-SESSION';
-  const dayBadge  = log.sessionKey?`<span class="badge b${log.sessionKey.toLowerCase()}">${SESS_LABEL[log.sessionKey]||log.sessionKey}</span>`:'';
+  // Graceful fallback for old session keys (A, B, C, D from previous versions)
+  const sessLabel = SESS_LABEL[log.sessionKey] || log.sessionKey || '?';
+  const sessBadge = SESS_BADGE[log.sessionKey] || 'bpre';
+  const dayBadge  = log.sessionKey
+    ? `<span class="badge ${sessBadge}">${sessLabel}</span>` : '';
 
   const right = isTrain
     ?`<div style="text-align:right"><div class="xs dimmer mb1">Feel</div><div class="mono b6" style="font-size:20px;color:${log.feel>=4?'var(--gn)':log.feel<=2?'var(--co)':'var(--tx2)'}">${log.feel}<span style="font-size:11px;color:var(--tx3)">/5</span></div></div>`
@@ -1294,12 +1376,18 @@ function buildHistEntry(log) {
   let body='';
   if (isExp) {
     if (isTrain) {
+      // Graceful session lookup — old logs may have session keys not in current PROG
       const sess = PROG.sessions[log.sessionKey];
       const exLines = (log.exLogs||[]).map((el,i)=>{
         const ex = sess?.exercises?.[i];
-        if (!ex) return '';
-        const sStr = el.sets.map(s=>ex.type==='plyo'?(s.done?'✓':'—'):ex.type==='timed'||ex.type==='carry'?`${s.dur||'?'}s`:ex.type==='bodyweight'?`${s.reps||'?'}r @${s.rpe||'?'}`:`${s.reps||'?'}r·${s.weight||'?'}kg @${s.rpe||'?'}`).filter(Boolean).join('  ');
-        return `<div class="hex">${ex.name}: <span>${el.sets.length} sets${sStr?' — '+sStr:''}</span></div>`;
+        const exName = ex?.name || `Exercise ${i+1}`;
+        const sStr = el.sets.map(s=>
+          !ex||ex.type==='plyo'?(s.done?'✓':'—'):
+          ex.type==='timed'||ex.type==='carry'?`${s.dur||'?'}s`:
+          ex.type==='bodyweight'?`${s.reps||'?'}r @${s.rpe||'?'}`:
+          `${s.reps||'?'}r·${s.weight||'?'}kg @${s.rpe||'?'}`
+        ).filter(Boolean).join('  ');
+        return `<div class="hex">${exName}: <span>${el.sets.length} sets${sStr?' — '+sStr:''}</span></div>`;
       }).join('');
       const acc=log.accuracy;
       const ac=acc?(acc.level==='good'?'var(--gn)':acc.level==='warn'?'var(--co)':'var(--am)'):'var(--tx3)';
