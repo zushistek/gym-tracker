@@ -59,18 +59,13 @@ button{cursor:pointer}
 
 /* Badges */
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:600;letter-spacing:.05em;font-family:'DM Mono',monospace}
-.ba{background:var(--pud);color:var(--pu)}
-.bb{background:var(--gnd);color:var(--gn)}
-.bc{background:var(--amd);color:var(--am)}
-.bd2cls{background:var(--cod);color:var(--co)}
-.bpre{background:var(--bg4);color:var(--tx2)}
-/* New session badges */
 .bap{background:var(--pud);color:var(--pu)}
 .bal{background:var(--bld);color:var(--bl)}
 .baf{background:var(--fld);color:var(--fl)}
 .bb{background:var(--gnd);color:var(--gn)}
 .bc{background:var(--amd);color:var(--am)}
 .bd{background:var(--cod);color:var(--co)}
+.bpre{background:var(--bg4);color:var(--tx2)}
 
 /* Day type selector */
 .dtype-row{display:flex;gap:5px;flex-wrap:wrap}
@@ -723,7 +718,7 @@ function buildWeekView(wk, isCurrent) {
 
     // Session menu (shown when this day is selected in edit mode)
     const showMenu = editDaysMode && editDayMenu === i;
-    const menuHTML = showMenu ? buildSessionMenu(i, sessionKey) : '';
+    const menuHTML = showMenu ? buildSessionMenu(i, sessionsOnDay) : '';
 
     let gymContent = '';
     if (sessionKey) {
@@ -791,21 +786,21 @@ function buildWeekView(wk, isCurrent) {
     <div class="bpad"></div>`;
 }
 
-function buildSessionMenu(dayIdx, currentKey) {
+function buildSessionMenu(dayIdx, sessionsOnDay) {
   const sessions = Object.entries(PROG.sessions);
   const opts = sessions.map(([key, sess])=>{
-    const isCurrent = currentKey === key;
+    const isActive = sessionsOnDay.includes(key);
     return `
       <div class="session-opt" onclick="assignDaySession(${dayIdx},'${key}');event.stopPropagation()">
         <div class="session-opt-lbl">
           <span class="badge b${key.toLowerCase()}">${SESS_LABEL[key]||key}</span>
           <span class="sm">${sess.name}</span>
         </div>
-        ${isCurrent?'<span class="session-tick">✓</span>':'<span class="session-tick-empty"></span>'}
+        ${isActive?'<span class="session-tick">✓</span>':'<span class="session-tick-empty"></span>'}
       </div>`;
   }).join('');
 
-  const noGymActive = !currentKey;
+  const noGymActive = sessionsOnDay.length === 0;
   const noGymOpt = `
     <div class="session-opt" onclick="assignDaySession(${dayIdx},null);event.stopPropagation()">
       <div class="session-opt-lbl">
@@ -838,14 +833,19 @@ function openEditDayMenu(dayIdx) {
 
 function assignDaySession(dayIdx, sessionKey) {
   const wk = getWeek(viewMonday);
-  // Remove this dayIdx from any existing assignment
-  Object.keys(wk.plan.assigned).forEach(sk=>{
-    if (wk.plan.assigned[sk] === dayIdx) wk.plan.assigned[sk] = null;
-  });
-  // Assign new session to this day (null = no gym)
-  if (sessionKey) wk.plan.assigned[sessionKey] = dayIdx;
-  editDayMenu = null; // close menu after selection
-  renderSchedule();   // show immediately — save happens on Done
+  if (sessionKey) {
+    // Move the selected session to this day.
+    // Do NOT clear what's already on this day — that's how conflicts are created deliberately.
+    // The session itself can only be on one day, so update its day index directly.
+    wk.plan.assigned[sessionKey] = dayIdx;
+  } else {
+    // "No gym" — remove ALL sessions currently assigned to this day
+    Object.keys(wk.plan.assigned).forEach(sk=>{
+      if (wk.plan.assigned[sk] === dayIdx) wk.plan.assigned[sk] = null;
+    });
+  }
+  editDayMenu = null;
+  renderSchedule(); // save happens on Done
 }
 
 function getModNote(ballet) {
